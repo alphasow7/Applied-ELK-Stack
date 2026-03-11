@@ -3,17 +3,17 @@ import { useNavigate } from 'react-router-dom'
 import { api } from '../hooks/useApi'
 
 export default function LoginPage() {
-  const [phone, setPhone] = useState('+221771234567')
+  const [phone, setPhone] = useState('+224620123456')
   const [password, setPassword] = useState('farmer123')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
 
   const DEMO_ACCOUNTS = [
-    { label: 'Agriculteur (Moussa)', phone: '+221771234567', pass: 'farmer123' },
-    { label: 'Coopérative (Thiès)', phone: '+221701111111', pass: 'coop123' },
-    { label: 'Acheteur industriel', phone: '+221702222222', pass: 'buyer123' },
-    { label: 'Admin', phone: '+221700000000', pass: 'admin123' },
+    { label: 'Agriculteur (Mamadou)', phone: '+224620123456', pass: 'farmer123' },
+    { label: 'Coopérative Foulaya', phone: '+224601111111', pass: 'coop123' },
+    { label: 'Exportateur Conakry', phone: '+224602222222', pass: 'buyer123' },
+    { label: 'Admin', phone: '+224600000000', pass: 'admin123' },
   ]
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -40,8 +40,9 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="text-5xl mb-3">🌾</div>
-          <h1 className="text-3xl font-bold text-white">AgriTech</h1>
+          <h1 className="text-3xl font-bold text-white">AgriTech Guinée</h1>
           <p className="text-agri-200 mt-1">Plateforme de Données Agricoles Prédictives</p>
+          <p className="text-agri-300 text-xs mt-1">Basse-Guinée · Moyenne-Guinée · Haute-Guinée · Guinée Forestière</p>
         </div>
 
         <div className="card">
@@ -63,7 +64,7 @@ export default function LoginPage() {
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-agri-500"
-                placeholder="+221771234567"
+                placeholder="+224620000000"
                 required
               />
             </div>
@@ -103,9 +104,9 @@ export default function LoginPage() {
         <div className="mt-6 card text-center">
           <p className="text-sm text-gray-600 font-medium mb-2">Agriculteurs sans smartphone</p>
           <div className="bg-agri-50 rounded-lg p-3 font-mono text-lg text-agri-700 font-bold tracking-widest">
-            *384*123#
+            *384*1#
           </div>
-          <p className="text-xs text-gray-400 mt-1">USSD disponible sur tout téléphone</p>
+          <p className="text-xs text-gray-400 mt-1">USSD disponible sur tout téléphone — Orange Guinea · MTN Guinea</p>
         </div>
       </div>
     </div>

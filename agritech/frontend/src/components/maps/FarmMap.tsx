@@ -24,10 +24,11 @@ interface FarmMarker {
 const riskColor = { low: '#22c55e', medium: '#f59e0b', high: '#ef4444' }
 
 export default function FarmMap({ farms }: { farms: FarmMarker[] }) {
-  const center: [number, number] = [14.5, -14.5]
+  // Centre de la Guinée (Conakry ~9.5, -13.7 — pays s'étend jusqu'à lat 12.7, lon -8.6)
+  const center: [number, number] = [10.5, -11.5]
 
   return (
-    <MapContainer center={center} zoom={6} style={{ height: '400px', width: '100%', borderRadius: '12px' }}>
+    <MapContainer center={center} zoom={7} style={{ height: '400px', width: '100%', borderRadius: '12px' }}>
       <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'

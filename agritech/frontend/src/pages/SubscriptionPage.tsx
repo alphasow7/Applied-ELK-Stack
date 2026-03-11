@@ -8,7 +8,7 @@ export default function SubscriptionPage() {
       badge: 'bg-agri-100 text-agri-700',
       badgeText: 'GRATUIT',
       features: [
-        '✅ Accès USSD (*384*123#)',
+        '✅ Accès USSD (*384*1#) — Orange/MTN Guinée',
         '✅ Prévisions météo 7 jours',
         '✅ Prévision de rendement',
         '✅ Alertes SMS',
@@ -18,9 +18,9 @@ export default function SubscriptionPage() {
       ],
     },
     {
-      name: 'Coopérative',
-      price: '25 000 XOF/mois',
-      subtitle: '270 000 XOF/an (10% réduction)',
+      name: 'Coopérative / Groupement',
+      price: '200 000 GNF/mois',
+      subtitle: '2 160 000 GNF/an (10% réduction) · ~21 EUR',
       color: 'border-blue-300 bg-blue-50',
       badge: 'bg-blue-100 text-blue-700',
       badgeText: 'B2B',
@@ -37,9 +37,9 @@ export default function SubscriptionPage() {
       ],
     },
     {
-      name: 'Acheteur Industriel',
-      price: '75 000 XOF/mois',
-      subtitle: '810 000 XOF/an',
+      name: 'Acheteur / Exportateur',
+      price: '650 000 GNF/mois',
+      subtitle: '7 020 000 GNF/an · ~69 EUR',
       color: 'border-purple-300 bg-purple-50',
       badge: 'bg-purple-100 text-purple-700',
       badgeText: 'ENTREPRISE',
@@ -55,8 +55,8 @@ export default function SubscriptionPage() {
     },
     {
       name: 'Assureur Agricole',
-      price: '150 000 XOF/mois',
-      subtitle: '1 620 000 XOF/an',
+      price: '1 300 000 GNF/mois',
+      subtitle: '14 040 000 GNF/an · ~138 EUR',
       color: 'border-amber-300 bg-amber-50',
       badge: 'bg-amber-100 text-amber-700',
       badgeText: 'ASSUREUR',
@@ -76,9 +76,9 @@ export default function SubscriptionPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Plans & Tarifs</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Plans & Tarifs — Guinée</h1>
         <p className="text-gray-500 text-sm">
-          Modèle Freemium pour les agriculteurs · SaaS B2B pour les coopératives et acheteurs
+          Freemium pour les agriculteurs (financé ONG) · SaaS B2B pour coopératives, exportateurs et assureurs · Prix en GNF (Franc Guinéen)
         </p>
       </div>
 
@@ -114,12 +114,13 @@ export default function SubscriptionPage() {
       </div>
 
       <div className="card bg-agri-50 border-agri-200">
-        <h2 className="font-semibold text-agri-800 mb-3">Programme ONG & Subventions</h2>
+        <h2 className="font-semibold text-agri-800 mb-3">Programme ONG & Partenaires en Guinée</h2>
         <p className="text-sm text-agri-700">
           Le plan Freemium est proposé gratuitement aux petits agriculteurs grâce à des partenariats
-          avec des ONG, des agences de développement agricole et des programmes gouvernementaux de subvention.
-          Si votre organisation souhaite financer l'accès pour des communautés agricoles,{' '}
-          <span className="font-semibold">contactez-nous à partenariats@agritech.sn</span>.
+          avec des ONG actives en Guinée : <strong>USAID Feed the Future, FAO Guinée, GIZ, FIDA, Banque Mondiale</strong>,
+          et le Ministère de l'Agriculture de Guinée (ANPROCA). Les coopératives rurales peuvent bénéficier
+          de subventions via le programme PNDA (Plan National de Développement Agricole).{' '}
+          <span className="font-semibold">Contactez-nous : partenariats@agritech.gn</span>
         </p>
       </div>
     </div>

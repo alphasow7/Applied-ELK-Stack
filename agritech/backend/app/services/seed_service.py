@@ -1,4 +1,4 @@
-"""Seed the database with realistic demo data."""
+"""Seed the database with realistic demo data — Contexte Guinée Conakry."""
 import random
 from datetime import datetime, timedelta
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,10 +9,12 @@ from app.models.market import CommodityPrice, MarketTrend
 from app.models.weather import WeatherData, SoilHealth
 from app.models.subscription import SubscriptionPlan
 from app.core.security import get_password_hash
-from app.services.market_service import COMMODITIES, MARKETS, BASE_PRICES
+from app.services.market_service import COMMODITIES, MARKETS, BASE_PRICES  # prix en GNF
 from app.services.weather_service import get_soil_health_score, compute_yield_prediction, _simulate_weather
 
 
+# ─── Plans tarifés en GNF (Franc Guinéen) ──────────────────────────────────────
+# 1 EUR ≈ 9 400 GNF | 1 USD ≈ 8 600 GNF
 PLANS = [
     {
         "name": "Freemium Agriculteur",
@@ -27,15 +29,18 @@ PLANS = [
         "api_access": False,
         "weather_alerts": True,
         "insurance_module": False,
-        "description": "Accès gratuit via USSD/SMS — prévisions météo, rendements et alertes.",
+        "description": (
+            "Accès gratuit via USSD (*384*1#) et SMS — météo, rendements, alertes. "
+            "Financé par ONG partenaires (USAID, FAO, GIZ, FIDA en Guinée)."
+        ),
     },
     {
-        "name": "Coopérative",
+        "name": "Coopérative / Groupement",
         "tier": "cooperative",
-        "price_monthly_xof": 25000,
-        "price_yearly_xof": 270000,
-        "max_farms": 200,
-        "max_users": 10,
+        "price_monthly_xof": 200_000,   # ~21 EUR/mois
+        "price_yearly_xof": 2_160_000,
+        "max_farms": 300,
+        "max_users": 15,
         "ussd_access": True,
         "web_dashboard": True,
         "market_analytics": True,
@@ -43,13 +48,16 @@ PLANS = [
         "api_access": False,
         "weather_alerts": True,
         "insurance_module": False,
-        "description": "Dashboard coopérative, prix marchés en temps réel, gestion groupée.",
+        "description": (
+            "Dashboard coopérative, prix marchés temps réel (12 marchés guinéens), "
+            "gestion groupée, prévisions rendement multi-cultures, alertes saison des pluies."
+        ),
     },
     {
-        "name": "Acheteur Industriel",
+        "name": "Acheteur / Exportateur",
         "tier": "enterprise",
-        "price_monthly_xof": 75000,
-        "price_yearly_xof": 810000,
+        "price_monthly_xof": 650_000,   # ~69 EUR/mois
+        "price_yearly_xof": 7_020_000,
         "max_farms": 5000,
         "max_users": 50,
         "ussd_access": True,
@@ -59,13 +67,16 @@ PLANS = [
         "api_access": True,
         "weather_alerts": True,
         "insurance_module": False,
-        "description": "Accès API complet, opportunités commerciales, analyses sectorielles.",
+        "description": (
+            "API complète, prévision d'offre par région, corridors CEDEAO, "
+            "opportunités d'arbitrage (café, fonio, arachide). Exportateurs et industriels."
+        ),
     },
     {
         "name": "Assureur Agricole",
         "tier": "insurer",
-        "price_monthly_xof": 150000,
-        "price_yearly_xof": 1620000,
+        "price_monthly_xof": 1_300_000,  # ~138 EUR/mois
+        "price_yearly_xof": 14_040_000,
         "max_farms": 99999,
         "max_users": 100,
         "ussd_access": True,
@@ -75,20 +86,42 @@ PLANS = [
         "api_access": True,
         "weather_alerts": True,
         "insurance_module": True,
-        "description": "Module assurance paramétrique, scoring risque, données satellites complètes.",
+        "description": (
+            "Module assurance paramétrique (indice pluviométrique, NDVI), scoring risque "
+            "par exploitation, données satellites. Pour assureurs et projets BAD/FIDA."
+        ),
     },
 ]
 
+# ─── Agriculteurs démo — 4 régions naturelles de Guinée ────────────────────────
+# Noms représentatifs : Pular (Moyenne-Guinée), Malinké (Haute-Guinée), Susu (Basse-Guinée)
 FARMERS_DATA = [
-    ("Moussa Diallo", "+221771234567", "Thiès", 14.79, -16.93),
-    ("Fatou Ndiaye", "+221772345678", "Kaolack", 14.15, -16.08),
-    ("Ibrahima Sow", "+221773456789", "Saint-Louis", 16.02, -16.49),
-    ("Aminata Diop", "+221774567890", "Ziguinchor", 12.56, -16.27),
-    ("Cheikh Ba", "+221775678901", "Tambacounda", 13.77, -13.67),
-    ("Rokhaya Fall", "+221776789012", "Thiès", 14.85, -16.55),
-    ("Oumar Gueye", "+221777890123", "Louga", 15.62, -16.22),
-    ("Ndéye Sarr", "+221778901234", "Kaolack", 14.23, -15.97),
+    # (nom,                 téléphone Orange GN,  région naturelle,    lat,    lon)
+    ("Mamadou Diallo",      "+224620123456",  "Basse-Guinée",         9.55,  -13.68),
+    ("Aissatou Bah",        "+224621234567",  "Moyenne-Guinée",      11.32,  -12.29),
+    ("Ibrahima Sow",        "+224622345678",  "Moyenne-Guinée",      10.38,  -12.08),
+    ("Fatoumata Barry",     "+224623456789",  "Haute-Guinée",        10.39,   -9.31),
+    ("Sékou Kouyaté",       "+224624567890",  "Haute-Guinée",        11.42,   -9.17),
+    ("Mariama Condé",       "+224625678901",  "Guinée Forestière",    7.75,   -8.82),
+    ("Oumar Camara",        "+224626789012",  "Guinée Forestière",    8.55,  -10.13),
+    ("Kadiatou Traoré",     "+224627890123",  "Basse-Guinée",        10.05,  -12.87),
 ]
+
+# Cultures par région naturelle
+CROPS_BY_REGION = {
+    "Basse-Guinée":       ["riz", "manioc", "banane_plantain", "huile_de_palme"],
+    "Moyenne-Guinée":     ["fonio", "maïs", "arachide", "riz"],
+    "Haute-Guinée":       ["maïs", "arachide", "riz", "fonio"],
+    "Guinée Forestière":  ["riz", "café", "manioc", "banane_plantain"],
+}
+
+# Types de sol typiques en Guinée
+SOILS_BY_REGION = {
+    "Basse-Guinée":       ["latéritique", "mangrove", "argilo-limoneux", "sablo-limoneux"],
+    "Moyenne-Guinée":     ["latéritique", "gravillonnaire", "argilo-sableux"],
+    "Haute-Guinée":       ["argilo-sableux", "latéritique", "limoneux"],
+    "Guinée Forestière":  ["argilo-limoneux", "humifère", "latéritique rouge"],
+}
 
 
 async def seed_database(db: AsyncSession):
@@ -104,34 +137,34 @@ async def seed_database(db: AsyncSession):
         plan_objs.append(plan)
     await db.flush()
 
-    # Admin user
+    # Admin
     admin = User(
-        phone_number="+221700000000",
-        email="admin@agritech.sn",
+        phone_number="+224600000000",
+        email="admin@agritech.gn",
         hashed_password=get_password_hash("admin123"),
-        full_name="Admin AgriTech",
+        full_name="Admin AgriTech Guinée",
         role=UserRole.ADMIN,
         subscription_tier=SubscriptionTier.FREE,
     )
     db.add(admin)
 
-    # Cooperative user
+    # Coopérative — Groupement Foulaya, Labé (Moyenne-Guinée, culture fonio)
     coop = User(
-        phone_number="+221701111111",
-        email="coop@groupement-thiès.sn",
+        phone_number="+224601111111",
+        email="coop@groupement-foulaya.gn",
         hashed_password=get_password_hash("coop123"),
-        full_name="Groupement Thiès Nord",
+        full_name="Groupement Foulaya — Labé",
         role=UserRole.COOPERATIVE,
         subscription_tier=SubscriptionTier.COOPERATIVE,
     )
     db.add(coop)
 
-    # Buyer
+    # Acheteur — exportateur café/fonio basé à Conakry
     buyer = User(
-        phone_number="+221702222222",
-        email="achat@senagri.sn",
+        phone_number="+224602222222",
+        email="export@guinee-agri-export.gn",
         hashed_password=get_password_hash("buyer123"),
-        full_name="Senagri Industries",
+        full_name="Guinée Agri Export SARL",
         role=UserRole.BUYER,
         subscription_tier=SubscriptionTier.ENTERPRISE,
     )
@@ -139,8 +172,6 @@ async def seed_database(db: AsyncSession):
 
     await db.flush()
 
-    # Farmers with farms and crops
-    crop_types = ["mil", "arachide", "sorgho", "maïs", "niébé"]
     for name, phone, region, lat, lon in FARMERS_DATA:
         farmer = User(
             phone_number=phone,
@@ -154,24 +185,26 @@ async def seed_database(db: AsyncSession):
 
         farm = Farm(
             owner_id=farmer.id,
-            name=f"Champ de {name.split()[0]}",
-            latitude=lat + random.uniform(-0.1, 0.1),
-            longitude=lon + random.uniform(-0.1, 0.1),
-            area_hectares=round(random.uniform(0.5, 5.0), 2),
+            name=f"Exploitation de {name.split()[0]}",
+            latitude=lat + random.uniform(-0.15, 0.15),
+            longitude=lon + random.uniform(-0.15, 0.15),
+            area_hectares=round(random.uniform(0.5, 3.5), 2),
             region=region,
-            soil_type=random.choice(["sableux", "argileux", "limoneux", "argilo-sableux"]),
-            irrigation=random.random() > 0.7,
+            country="Guinée",
+            soil_type=random.choice(SOILS_BY_REGION.get(region, ["latéritique"])),
+            irrigation=random.random() > 0.78,  # irrigation très peu répandue en Guinée
         )
         db.add(farm)
         await db.flush()
 
-        crop_type = random.choice(crop_types)
-        planting = datetime.utcnow() - timedelta(days=random.randint(30, 90))
+        crop_type = random.choice(CROPS_BY_REGION.get(region, ["riz"]))
+        # Calendrier Guinée : semis mai-juil, récolte oct-jan selon culture
+        planting = datetime.utcnow() - timedelta(days=random.randint(20, 130))
         crop = Crop(
             farm_id=farm.id,
             crop_type=crop_type,
             planting_date=planting,
-            expected_harvest_date=planting + timedelta(days=random.randint(90, 150)),
+            expected_harvest_date=planting + timedelta(days=random.randint(90, 200)),
             area_planted_hectares=farm.area_hectares,
             status=random.choice(["planted", "growing", "growing"]),
         )
@@ -181,7 +214,9 @@ async def seed_database(db: AsyncSession):
         # Yield prediction
         weather = _simulate_weather(lat, lon, 7)
         soil = get_soil_health_score(lat, lon)
-        pred = compute_yield_prediction(crop_type, farm.area_hectares, weather, soil["health_score"], farm.irrigation)
+        pred = compute_yield_prediction(
+            crop_type, farm.area_hectares, weather, soil["health_score"], farm.irrigation
+        )
         yp = YieldPrediction(
             crop_id=crop.id,
             predicted_yield_kg=pred["predicted_yield_kg"],
@@ -194,18 +229,19 @@ async def seed_database(db: AsyncSession):
         )
         db.add(yp)
 
-    # Market prices — 7 days of history
+    # Market prices — 7 jours d'historique (GNF)
     for days_ago in range(7, 0, -1):
         recorded = datetime.utcnow() - timedelta(days=days_ago)
         for market_name, minfo in MARKETS.items():
             for commodity in COMMODITIES:
                 base = BASE_PRICES[commodity]
-                price = round(base * (1 + random.uniform(-0.1, 0.15)), 0)
+                price = round(base * (1 + random.uniform(-0.12, 0.18)) / 100) * 100
                 db.add(CommodityPrice(
                     commodity=commodity,
                     market_name=market_name,
                     region=minfo["region"],
                     price_per_kg=price,
+                    currency="GNF",
                     recorded_at=recorded,
                 ))
 

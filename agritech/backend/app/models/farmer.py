@@ -31,7 +31,7 @@ class User(Base):
     role = Column(Enum(UserRole), default=UserRole.FARMER)
     subscription_tier = Column(Enum(SubscriptionTier), default=SubscriptionTier.FREE)
     is_active = Column(Boolean, default=True)
-    preferred_language = Column(String(5), default="fr")  # fr, en, sw, ha
+    preferred_language = Column(String(5), default="fr")  # fr, pu (Pular), ml (Malinké), su (Susu)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
@@ -49,7 +49,7 @@ class Farm(Base):
     longitude = Column(Float, nullable=False)
     area_hectares = Column(Float, nullable=False)
     region = Column(String(100), nullable=False)
-    country = Column(String(100), default="Sénégal")
+    country = Column(String(100), default="Guinée")
     soil_type = Column(String(100), nullable=True)
     irrigation = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -63,7 +63,7 @@ class Crop(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     farm_id = Column(Integer, ForeignKey("farms.id"), nullable=False)
-    crop_type = Column(String(100), nullable=False)  # mil, sorgho, arachide, maïs, riz
+    crop_type = Column(String(100), nullable=False)  # riz, manioc, fonio, maïs, café, banane_plantain…
     planting_date = Column(DateTime(timezone=True), nullable=False)
     expected_harvest_date = Column(DateTime(timezone=True), nullable=True)
     actual_harvest_date = Column(DateTime(timezone=True), nullable=True)

@@ -3,21 +3,30 @@ from app.services.weather_service import fetch_weather, get_soil_health_score
 
 router = APIRouter(prefix="/weather", tags=["Weather & Soil"])
 
-SENEGAL_REGIONS = {
-    "Dakar": (14.72, -17.47),
-    "Thiès": (14.79, -16.93),
-    "Kaolack": (14.15, -16.08),
-    "Ziguinchor": (12.56, -16.27),
-    "Saint-Louis": (16.02, -16.49),
-    "Tambacounda": (13.77, -13.67),
-    "Diourbel": (14.65, -16.23),
-    "Louga": (15.62, -16.22),
-    "Fatick": (14.34, -16.41),
-    "Kolda": (12.89, -14.94),
-    "Matam": (15.66, -13.26),
-    "Kaffrine": (14.10, -15.55),
-    "Kédougou": (12.56, -12.18),
-    "Sédhiou": (12.71, -15.56),
+# 4 régions naturelles de Guinée + principales villes
+# Source : Institut National de la Statistique Guinée (INS)
+GUINEE_REGIONS = {
+    # Basse-Guinée (Guinée Maritime)
+    "Conakry":   (9.55,  -13.68),
+    "Kindia":    (10.05, -12.87),
+    "Boké":      (10.93, -14.30),
+    "Coyah":     (9.70,  -13.38),
+    "Forécariah":(9.43,  -13.10),
+    # Moyenne-Guinée (Futa Djalon)
+    "Labé":      (11.32, -12.29),
+    "Mamou":     (10.38, -12.08),
+    "Dalaba":    (10.69, -12.25),
+    "Pita":      (11.07, -12.40),
+    # Haute-Guinée
+    "Kankan":    (10.39,  -9.31),
+    "Faranah":   (10.04, -10.74),
+    "Siguiri":   (11.42,  -9.17),
+    "Kouroussa": (10.65, -10.00),
+    # Guinée Forestière
+    "N'Zérékoré":   (7.75,   -8.82),
+    "Guéckédou":    (8.55,  -10.13),
+    "Macenta":      (8.55,   -9.47),
+    "Lola":         (7.82,   -8.53),
 }
 
 
@@ -33,9 +42,9 @@ async def weather_forecast(
 
 @router.get("/region/{region_name}")
 async def region_weather(region_name: str, days: int = Query(7, ge=1, le=14)):
-    coords = SENEGAL_REGIONS.get(region_name)
+    coords = GUINEE_REGIONS.get(region_name)
     if not coords:
-        return {"error": f"Région inconnue. Disponibles: {list(SENEGAL_REGIONS.keys())}"}
+        return {"error": f"Région inconnue. Disponibles: {list(GUINEE_REGIONS.keys())}"}
     lat, lon = coords
     data = await fetch_weather(lat, lon, days)
     soil = get_soil_health_score(lat, lon)
@@ -49,7 +58,7 @@ async def region_weather(region_name: str, days: int = Query(7, ge=1, le=14)):
 
 @router.get("/regions")
 async def all_regions():
-    return {"regions": list(SENEGAL_REGIONS.keys())}
+    return {"regions": list(GUINEE_REGIONS.keys())}
 
 
 @router.get("/soil")

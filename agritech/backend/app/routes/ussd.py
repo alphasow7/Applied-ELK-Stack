@@ -1,13 +1,16 @@
 """
-USSD/SMS Handler compatible with Africa's Talking gateway.
-USSD flow: *384*123# → menu → submenu → response
+USSD/SMS Handler compatible avec Orange Guinea / MTN Guinea (Africa's Talking).
+USSD flow: *384*1# → menu → submenu → réponse
 
-Menu structure (multilingual: FR/EN):
+Opérateurs Guinée : Orange Guinea (+224 620-629), MTN Guinea (+224 660-663)
+Code USSD national : *384*1#  (à valider avec l'opérateur local)
+
+Menu structure (FR — langues locales: Pular, Malinké, Susu à venir):
 1. Prix du marché
-2. Météo & Conseils
+2. Météo & Sol
 3. Mon rendement prévu
-4. Alertes
-5. Inscription / Mon compte
+4. Conseils saison
+5. Mon compte
 """
 from fastapi import APIRouter, Form, Request
 from typing import Optional
@@ -17,7 +20,8 @@ from app.core.logging import logger
 
 router = APIRouter(tags=["USSD/SMS"])
 
-CROP_LIST = ["mil", "sorgho", "arachide", "maïs", "riz", "niébé"]
+# Cultures prioritaires en Guinée (USSD = max 6 options lisibles sur écran basique)
+CROP_LIST = ["riz", "manioc", "fonio", "maïs", "arachide", "café"]
 
 
 def _fmt_price(commodity: str, region: str = None) -> str:
@@ -27,23 +31,25 @@ def _fmt_price(commodity: str, region: str = None) -> str:
     avg = sum(p["price_per_kg"] for p in prices) / len(prices)
     mn = min(p["price_per_kg"] for p in prices)
     mx = max(p["price_per_kg"] for p in prices)
+    label = commodity.replace("_", " ").upper()
     return (
-        f"{commodity.upper()}\n"
-        f"Moy: {int(avg)} XOF/kg\n"
-        f"Min: {int(mn)} | Max: {int(mx)}\n"
+        f"{label}\n"
+        f"Moy: {int(avg):,} GNF/kg\n"
+        f"Min: {int(mn):,} | Max: {int(mx):,}\n"
         f"Marchés: {len(prices)}"
     )
 
 
-def _fmt_weather(region: str = "Thiès") -> str:
+def _fmt_weather(region: str = "Conakry") -> str:
+    # 5 villes représentatives des 4 régions naturelles de Guinée
     REGIONS = {
-        "Dakar": (14.72, -17.47),
-        "Thiès": (14.79, -16.93),
-        "Kaolack": (14.15, -16.08),
-        "Ziguinchor": (12.56, -16.27),
-        "Saint-Louis": (16.02, -16.49),
+        "Conakry":    (9.55,  -13.68),   # Basse-Guinée
+        "Kindia":     (10.05, -12.87),   # Basse-Guinée
+        "Labé":       (11.32, -12.29),   # Moyenne-Guinée
+        "Kankan":     (10.39,  -9.31),   # Haute-Guinée
+        "N'Zérékoré": (7.75,  -8.82),   # Guinée Forestière
     }
-    coords = REGIONS.get(region, (14.79, -16.93))
+    coords = REGIONS.get(region, (9.55, -13.68))
     data = _simulate_weather(*coords, 3)
     d = data["daily"]
     lines = [f"MÉTÉO {region}"]
@@ -55,9 +61,9 @@ def _fmt_weather(region: str = "Thiès") -> str:
     return "\n".join(lines)
 
 
-def _fmt_yield(crop: str = "mil", area: float = 1.0) -> str:
-    data = _simulate_weather(14.79, -16.93, 7)
-    soil = get_soil_health_score(14.79, -16.93)
+def _fmt_yield(crop: str = "riz", area: float = 1.0) -> str:
+    data = _simulate_weather(9.55, -13.68, 7)  # Conakry par défaut
+    soil = get_soil_health_score(9.55, -13.68)
     pred = compute_yield_prediction(crop, area, data, soil["health_score"])
     risk_emoji = {"low": "✓", "medium": "~", "high": "!"}.get(pred["risk_level"], "~")
     return (
@@ -76,11 +82,11 @@ def _process_ussd(session_id: str, phone: str, text: str) -> str:
     # Root menu
     if not steps:
         return (
-            "CON Bienvenue AgriTech\n"
+            "CON AgriTech Guinée\n"
             "1. Prix marchés\n"
             "2. Météo & Sol\n"
             "3. Rendement prévu\n"
-            "4. Conseils agricoles\n"
+            "4. Conseils saison\n"
             "5. Mon compte"
         )
 
@@ -106,14 +112,14 @@ def _process_ussd(session_id: str, phone: str, text: str) -> str:
         if len(steps) == 1:
             return (
                 "CON MÉTÉO & SOL\n"
-                "1. Dakar\n"
-                "2. Thiès\n"
-                "3. Kaolack\n"
-                "4. Ziguinchor\n"
-                "5. Saint-Louis"
+                "1. Conakry\n"
+                "2. Kindia\n"
+                "3. Labé\n"
+                "4. Kankan\n"
+                "5. N'Zérékoré"
             )
         if len(steps) == 2:
-            regions = ["Dakar", "Thiès", "Kaolack", "Ziguinchor", "Saint-Louis"]
+            regions = ["Conakry", "Kindia", "Labé", "Kankan", "N'Zérékoré"]
             idx = int(steps[1]) - 1
             if 0 <= idx < len(regions):
                 result = _fmt_weather(regions[idx])
@@ -138,14 +144,15 @@ def _process_ussd(session_id: str, phone: str, text: str) -> str:
                 return f"END {result}"
             return "END Entrée invalide."
 
-    # --- CONSEILS ---
+    # --- CONSEILS SAISON ---
     elif level1 == "4":
         return (
-            "END CONSEILS DU JOUR\n"
-            "• Vérifiez l'humidité du sol avant l'irrigation\n"
-            "• Traitez contre les criquets en saison sèche\n"
-            "• Stockez dans des sacs hermétiques\n"
-            "• Vendez quand les prix sont hauts (Dakar)"
+            "END CONSEILS SAISON\n"
+            "• Saison des pluies (mai-oct): préparez les bas-fonds pour le riz\n"
+            "• Réduisez les pertes post-récolte: séchez bien avant stockage\n"
+            "• Utilisez des sacs hermétiques (PICS) contre les insectes\n"
+            "• Café/fonio: vendez à Conakry pour meilleur prix\n"
+            "• Protégez les tubercules (manioc) de l'humidité excessive"
         )
 
     # --- MON COMPTE ---
@@ -155,11 +162,12 @@ def _process_ussd(session_id: str, phone: str, text: str) -> str:
             f"Tél: {phone}\n"
             "Plan: Freemium (gratuit)\n"
             "Pour upgrader:\n"
-            "agritech.sn/upgrade\n"
-            "ou SMS: UPGRADE au 3434"
+            "agritech.gn/upgrade\n"
+            "ou SMS: UPGRADE au 3434\n"
+            "Orange/MTN Guinea"
         )
 
-    return "END Choix invalide. Rappeler *384*123#"
+    return "END Choix invalide. Rappeler *384*1#"
 
 
 @router.post("/ussd")
@@ -168,7 +176,7 @@ async def ussd_handler(
     sessionId: str = Form(...),
     phoneNumber: str = Form(...),
     networkCode: str = Form(default="62101"),
-    serviceCode: str = Form(default="*384*123#"),
+    serviceCode: str = Form(default="*384*1#"),
     text: str = Form(default=""),
 ):
     logger.info(f"USSD session={sessionId} phone={phoneNumber} text={text}")
@@ -189,28 +197,32 @@ async def sms_handler(
     logger.info(f"SMS from={from_} cmd={cmd}")
 
     responses = {
-        "PRIX MIL": _fmt_price("mil"),
-        "PRIX ARACHIDE": _fmt_price("arachide"),
-        "PRIX MAIS": _fmt_price("maïs"),
-        "PRIX RIZ": _fmt_price("riz"),
-        "METEO": _fmt_weather("Thiès"),
+        "PRIX RIZ":     _fmt_price("riz"),
+        "PRIX FONIO":   _fmt_price("fonio"),
+        "PRIX MANIOC":  _fmt_price("manioc"),
+        "PRIX CAFE":    _fmt_price("café"),
+        "PRIX MAIS":    _fmt_price("maïs"),
+        "METEO":        _fmt_weather("Conakry"),
         "AIDE": (
-            "AgriTech - Commandes SMS:\n"
+            "AgriTech Guinée - SMS:\n"
             "PRIX [culture] - Prix du marché\n"
+            "Ex: PRIX RIZ, PRIX FONIO\n"
             "METEO - Météo du jour\n"
-            "AIDE - Ce menu"
+            "AIDE - Ce menu\n"
+            "Orange/MTN +224"
         ),
     }
 
     # Dynamic PRIX command
     if cmd.startswith("PRIX "):
-        crop = cmd[5:].lower()
+        crop = cmd[5:].lower().replace(" ", "_")
         if crop in COMMODITIES:
             sms_text = _fmt_price(crop)
         else:
-            sms_text = f"Culture inconnue. Essayer: {', '.join(COMMODITIES)}"
+            readable = [c.replace("_", " ") for c in COMMODITIES]
+            sms_text = f"Culture inconnue. Essayer: {', '.join(readable)}"
     else:
-        sms_text = responses.get(cmd, "Tapez AIDE pour les commandes disponibles.")
+        sms_text = responses.get(cmd, "Tapez AIDE pour les commandes.")
 
     return {"message": sms_text, "recipient": from_}
 
@@ -219,14 +231,14 @@ async def sms_handler(
 async def ussd_demo():
     """Demo endpoint showing USSD flow without a real gateway."""
     flows = {
-        "root": _process_ussd("demo", "+221770000000", ""),
-        "market_menu": _process_ussd("demo", "+221770000000", "1"),
-        "mil_price": _process_ussd("demo", "+221770000000", "1*1"),
-        "weather_menu": _process_ussd("demo", "+221770000000", "2"),
-        "weather_thies": _process_ussd("demo", "+221770000000", "2*2"),
-        "yield_crop": _process_ussd("demo", "+221770000000", "3"),
-        "yield_surface": _process_ussd("demo", "+221770000000", "3*1"),
-        "yield_result": _process_ussd("demo", "+221770000000", "3*1*2"),
-        "tips": _process_ussd("demo", "+221770000000", "4"),
+        "root": _process_ussd("demo", "+224620000000", ""),
+        "market_menu": _process_ussd("demo", "+224620000000", "1"),
+        "mil_price": _process_ussd("demo", "+224620000000", "1*1"),
+        "weather_menu": _process_ussd("demo", "+224620000000", "2"),
+        "weather_thies": _process_ussd("demo", "+224620000000", "2*2"),
+        "yield_crop": _process_ussd("demo", "+224620000000", "3"),
+        "yield_surface": _process_ussd("demo", "+224620000000", "3*1"),
+        "yield_result": _process_ussd("demo", "+224620000000", "3*1*2"),
+        "tips": _process_ussd("demo", "+224620000000", "4"),
     }
     return {"ussd_flows": flows}

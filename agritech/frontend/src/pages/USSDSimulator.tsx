@@ -40,13 +40,15 @@ export default function USSDSimulator() {
   const QUICK_NAVIGATIONS = [
     { label: 'Menu principal', text: '' },
     { label: '1. Prix marchés', text: '1' },
-    { label: '  1.1 Prix mil', text: '1*1' },
-    { label: '  1.3 Prix arachide', text: '1*3' },
+    { label: '  1.1 Prix riz', text: '1*1' },
+    { label: '  1.3 Prix fonio', text: '1*3' },
     { label: '2. Météo', text: '2' },
-    { label: '  2.2 Météo Thiès', text: '2*2' },
+    { label: '  2.1 Météo Conakry', text: '2*1' },
+    { label: '  2.3 Météo Labé', text: '2*3' },
     { label: '3. Rendement', text: '3' },
-    { label: '  3.1 Mil, 1ha', text: '3*1*2' },
-    { label: '4. Conseils', text: '4' },
+    { label: '  3.1 Riz, 1ha', text: '3*1*2' },
+    { label: '  3.3 Fonio, 0.5ha', text: '3*3*1' },
+    { label: '4. Conseils saison', text: '4' },
     { label: '5. Mon compte', text: '5' },
   ]
 
@@ -55,7 +57,7 @@ export default function USSDSimulator() {
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Simulateur USSD/SMS</h1>
         <p className="text-gray-500 text-sm">
-          Testez l'interface USSD accessible via <span className="font-mono font-bold">*384*123#</span> sur tout téléphone
+          Testez l'interface USSD accessible via <span className="font-mono font-bold">*384*1#</span> sur tout téléphone — Orange Guinea · MTN Guinea (+224)
         </p>
       </div>
 

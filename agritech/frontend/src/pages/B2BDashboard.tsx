@@ -39,15 +39,20 @@ interface RiskData {
   }[]
 }
 
-const SENEGAL_FARMS = [
-  { id: 1, name: 'Champ Moussa', latitude: 14.79, longitude: -16.93, region: 'Thiès', crop_type: 'mil', risk_level: 'low' as const, predicted_yield_kg: 1800 },
-  { id: 2, name: 'Champ Fatou', latitude: 14.15, longitude: -16.08, region: 'Kaolack', crop_type: 'arachide', risk_level: 'medium' as const, predicted_yield_kg: 2400 },
-  { id: 3, name: 'Champ Ibrahima', latitude: 16.02, longitude: -16.49, region: 'Saint-Louis', crop_type: 'riz', risk_level: 'low' as const, predicted_yield_kg: 6000 },
-  { id: 4, name: 'Champ Aminata', latitude: 12.56, longitude: -16.27, region: 'Ziguinchor', crop_type: 'maïs', risk_level: 'high' as const, predicted_yield_kg: 900 },
-  { id: 5, name: 'Champ Cheikh', latitude: 13.77, longitude: -13.67, region: 'Tambacounda', crop_type: 'sorgho', risk_level: 'medium' as const, predicted_yield_kg: 1500 },
-  { id: 6, name: 'Champ Rokhaya', latitude: 14.85, longitude: -16.55, region: 'Thiès', crop_type: 'mil', risk_level: 'low' as const, predicted_yield_kg: 2200 },
-  { id: 7, name: 'Champ Oumar', latitude: 15.62, longitude: -16.22, region: 'Louga', crop_type: 'niébé', risk_level: 'medium' as const, predicted_yield_kg: 700 },
-  { id: 8, name: 'Champ Ndéye', latitude: 14.23, longitude: -15.97, region: 'Kaolack', crop_type: 'arachide', risk_level: 'low' as const, predicted_yield_kg: 3200 },
+// Exploitations démo — 4 régions naturelles de Guinée
+const GUINEE_FARMS = [
+  // Basse-Guinée (Guinée Maritime)
+  { id: 1, name: 'Expl. Mamadou', latitude:  9.55, longitude: -13.68, region: 'Basse-Guinée',      crop_type: 'riz',              risk_level: 'low'    as const, predicted_yield_kg: 4400 },
+  { id: 2, name: 'Expl. Kadiatou', latitude: 10.05, longitude: -12.87, region: 'Basse-Guinée',     crop_type: 'manioc',           risk_level: 'medium' as const, predicted_yield_kg: 15000 },
+  // Moyenne-Guinée (Futa Djalon)
+  { id: 3, name: 'Expl. Aissatou', latitude: 11.32, longitude: -12.29, region: 'Moyenne-Guinée',   crop_type: 'fonio',            risk_level: 'low'    as const, predicted_yield_kg: 640 },
+  { id: 4, name: 'Expl. Ibrahima', latitude: 10.38, longitude: -12.08, region: 'Moyenne-Guinée',   crop_type: 'maïs',             risk_level: 'medium' as const, predicted_yield_kg: 3200 },
+  // Haute-Guinée
+  { id: 5, name: 'Expl. Fatoumata', latitude: 10.39, longitude:  -9.31, region: 'Haute-Guinée',   crop_type: 'arachide',         risk_level: 'medium' as const, predicted_yield_kg: 1760 },
+  { id: 6, name: 'Expl. Sékou',     latitude: 11.42, longitude:  -9.17, region: 'Haute-Guinée',   crop_type: 'maïs',             risk_level: 'high'   as const, predicted_yield_kg: 1200 },
+  // Guinée Forestière
+  { id: 7, name: 'Expl. Mariama',   latitude:  7.75, longitude:  -8.82, region: 'Guinée Forestière', crop_type: 'café',           risk_level: 'low'    as const, predicted_yield_kg: 900 },
+  { id: 8, name: 'Expl. Oumar',     latitude:  8.55, longitude: -10.13, region: 'Guinée Forestière', crop_type: 'banane_plantain', risk_level: 'medium' as const, predicted_yield_kg: 24000 },
 ]
 
 export default function B2BDashboard() {
@@ -60,8 +65,8 @@ export default function B2BDashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Tableau de Bord B2B</h1>
-        <p className="text-gray-500 text-sm">Vue plateforme — coopératives & acheteurs industriels</p>
+        <h1 className="text-2xl font-bold text-gray-900">Tableau de Bord B2B — Guinée</h1>
+        <p className="text-gray-500 text-sm">Vue plateforme — coopératives, exportateurs & acheteurs industriels · Basse-Guinée · Moyenne-Guinée · Haute-Guinée · Guinée Forestière</p>
       </div>
 
       {oLoading ? <Spinner /> : (
@@ -88,7 +93,7 @@ export default function B2BDashboard() {
               <div key={m.commodity} className="text-center bg-gray-50 rounded-lg p-3">
                 <p className="text-xs text-gray-500 capitalize">{m.commodity}</p>
                 <p className="text-lg font-bold text-agri-700">{m.avg_price_xof_kg.toLocaleString('fr-FR')}</p>
-                <p className="text-xs text-gray-400">XOF/kg</p>
+                <p className="text-xs text-gray-400">GNF/kg</p>
                 <span className={`text-xs ${m.trend === 'up' ? 'text-green-600' : 'text-red-500'}`}>
                   {m.trend === 'up' ? '▲' : '▼'}
                 </span>
@@ -149,7 +154,7 @@ export default function B2BDashboard() {
       {/* Farm map */}
       <div className="card">
         <h2 className="text-lg font-semibold mb-4">Carte des Exploitations</h2>
-        <FarmMap farms={SENEGAL_FARMS} />
+        <FarmMap farms={GUINEE_FARMS} />
       </div>
 
       {/* Risk heatmap */}
